@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/LeezyWannaFall/Kacpersky_2026_testovoe/internal/model"
@@ -43,18 +44,19 @@ func (s *Service) Get(ctx context.Context, md5 string) (*model.Threat, error) {
 	if err := model.ValidateMD5(md5); err != nil {
 		return nil, err
 	}
-	return s.repository.Get(ctx, md5)
+	return s.repository.Get(ctx, strings.ToLower(md5))
 }
 
 func (s *Service) Update(ctx context.Context, md5, name, description string, severity model.Severity, threatType string) (*model.Threat, error) {
 	if err := model.ValidateMD5(md5); err != nil {
 		return nil, err
 	}
-	if _, err := model.NewThreat(md5, name, description, severity, threatType); err != nil {
+	validated, err := model.NewThreat(md5, name, description, severity, threatType)
+	if err != nil {
 		return nil, err
 	}
 
-	threat, err := s.repository.Get(ctx, md5)
+	threat, err := s.repository.Get(ctx, validated.MD5)
 	if err != nil {
 		return nil, err
 	}

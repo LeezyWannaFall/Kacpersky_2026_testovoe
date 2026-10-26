@@ -71,6 +71,18 @@ func TestGetReturnsNotFound(t *testing.T) {
 	}
 }
 
+func TestGetNormalizesMD5(t *testing.T) {
+	repository := &fakeRepository{}
+	_, _ = New(repository).Create(context.Background(), testMD5, "Trojan", "", model.SeverityHigh, "")
+	threat, err := New(repository).Get(context.Background(), "D41D8CD98F00B204E9800998ECF8427E")
+	if err != nil {
+		t.Fatalf("Get() error = %v", err)
+	}
+	if threat.MD5 != testMD5 {
+		t.Fatalf("MD5 = %q, want %q", threat.MD5, testMD5)
+	}
+}
+
 func TestUpdateReplacesFields(t *testing.T) {
 	old, err := model.NewThreat(testMD5, "Old", "old details", model.SeverityLow, "old type")
 	if err != nil {
